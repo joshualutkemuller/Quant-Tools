@@ -29,7 +29,6 @@ def get_sp500_tickers():
         ticker = ticker[:-1]
         tickers.append(ticker)
     Ticker_Dataframe = pd.DataFrame(tickers, columns=['Ticker_Name'])
-    Ticker_Dataframe.to_excel("S&P500 Current Ticker List.xlsx", index=False)
     return tickers
 
 def get_data_from_yahoo():
