@@ -2,6 +2,11 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import subprocess
+import sys
+
+def install(name):
+    subprocess.call([sys.executable, '-m', 'pip', 'install', name])
 
 # Load data
 data = pd.read_csv('sp500_joined_closes.csv')
@@ -67,4 +72,8 @@ def main():
     st.write(f"Volatility (Standard Deviation of Daily Returns): {volatility:.2%}")
     
 if __name__ == '__main__':
+    install('matplotlib')
+    install('pandas')    
+    install('numpy')
     main()
+
