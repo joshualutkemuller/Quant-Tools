@@ -47,6 +47,7 @@ def get_data_from_yahoo():
             print(ticker)
             df = pdr.get_data_yahoo(ticker, start_date, end_date)
             df.reset_index(inplace=True)
+            print(df.columns)
             all_stock_data[ticker] = df
         except:
             print(f"Issue with Ticker: {ticker}")
@@ -63,7 +64,7 @@ def compile_data(all_stock_data):
     for count, ticker in enumerate(tickers):
         if ticker in all_stock_data:
             df = all_stock_data[ticker]
-            df = df.loc[:,['Adj Close']]  # Select only the 'Adj Close' column
+            df = df.loc[:,['Date','Adj Close']]  # Select only the 'Adj Close' column
             df.rename(columns={'Adj Close': ticker}, inplace=True)
 
             if main_df.empty:
