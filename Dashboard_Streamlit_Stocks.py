@@ -12,6 +12,10 @@ import requests
 import yfinance as yf
 import pandas as pd
 
+def install(name):
+    subprocess.call([sys.executable, '-m', 'pip', 'install', name])
+
+
 
 yf.pdr_override()
 
@@ -42,6 +46,7 @@ def get_data_from_yahoo():
         try:
             print(ticker)
             df = pdr.get_data_yahoo(ticker, start_date, end_date)
+            df.reset_index(inplace=True)
             all_stock_data[ticker] = df
         except:
             print(f"Issue with Ticker: {ticker}")
@@ -64,7 +69,7 @@ def compile_data(all_stock_data):
             if main_df.empty:
                 main_df = df
             else:
-                main_df = main_df.join(df, how='outer')
+                main_df = pd.merge(main_df, df, on='Date', how='outer')
 
         if count % 10 == 0:
             print(count)
@@ -79,7 +84,6 @@ def main():
         # Load data
     data = compile_data(get_data_from_yahoo())
     data['Date'] = pd.to_datetime(data['Date'])
-
     st.title('S&P 500 Stock Explorer')
     
     # Date Range Selector
@@ -136,7 +140,9 @@ def main():
     volatility = filtered_data['Daily Returns'].std()
     st.subheader(f'Volatility for {selected_stock}')
     st.write(f"Volatility (Standard Deviation of Daily Returns): {volatility:.2%}")
-    
+
 if __name__ == '__main__':
+
     main()
+
 
