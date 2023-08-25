@@ -4,16 +4,87 @@ import numpy as np
 import matplotlib.pyplot as plt
 import subprocess
 import sys
+import bs4 as bs
+import datetime as dt
+from datetime import datetime, timedelta
+from pandas_datareader import data as pdr
+import requests
+import yfinance as yf
+import pandas as pd
 
 def install(name):
     subprocess.call([sys.executable, '-m', 'pip', 'install', name])
 
-# Load data
-data = pd.read_csv('sp500_joined_closes.csv')
-data['Date'] = pd.to_datetime(data['Date'])
+
+
+yf.pdr_override()
+
+def get_sp500_tickers():
+    resp = requests.get('http://en.wikipedia.org/wiki/List_of_S%26P_500_companies')
+    soup = bs.BeautifulSoup(resp.text, 'lxml')
+    table = soup.find('table', {'class': 'wikitable sortable'})
+    tickers = []
+    for row in table.findAll('tr')[1:]:
+        ticker = row.findAll('td')[0].text.replace('.', '-')
+        ticker = ticker[:-1]
+        tickers.append(ticker)
+    Ticker_Dataframe = pd.DataFrame(tickers, columns=['Ticker_Name'])
+    Ticker_Dataframe.to_excel("S&P500 Current Ticker List.xlsx", index=False)
+    return tickers
+
+def get_data_from_yahoo():
+
+        # Get date from 10 years ago from current date
+    start_date = dt.datetime.now() - timedelta(days=365*10)
+    end_date = dt.datetime.now()
+
+
+    all_stock_data = {}  # Dictionary to store all stock DataFrames
+    
+    tickers = get_sp500_tickers()
+
+    for ticker in tickers:
+        try:
+            print(ticker)
+            df = pdr.get_data_yahoo(ticker, start_date, end_date)
+            all_stock_data[ticker] = df
+        except:
+            print(f"Issue with Ticker: {ticker}")
+    
+    return all_stock_data
+
+def compile_data(all_stock_data):
+
+
+    tickers = get_sp500_tickers()
+
+    main_df = pd.DataFrame()
+
+    for count, ticker in enumerate(tickers):
+        if ticker in all_stock_data:
+            df = all_stock_data[ticker]
+            df = df.loc[:,['Adj Close']]  # Select only the 'Adj Close' column
+            df.rename(columns={'Adj Close': ticker}, inplace=True)
+
+            if main_df.empty:
+                main_df = df
+            else:
+                main_df = main_df.join(df, how='outer')
+
+        if count % 10 == 0:
+            print(count)
+    print(main_df.head())
+    #main_df.to_csv('sp500_joined_closes.csv')
+    return main_df
+
 
 # Streamlit app
 def main():
+
+        # Load data
+    data = compile_data(get_data_from_yahoo())
+    data['Date'] = pd.to_datetime(data['Date'])
+
     st.title('S&P 500 Stock Explorer')
     
     # Date Range Selector
@@ -75,5 +146,6 @@ if __name__ == '__main__':
     install('matplotlib')
     install('pandas')    
     install('numpy')
+    install('pandas-datareader')
     main()
 
