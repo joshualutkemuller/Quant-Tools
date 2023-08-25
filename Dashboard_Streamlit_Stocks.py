@@ -12,10 +12,6 @@ import requests
 import yfinance as yf
 import pandas as pd
 
-def install(name):
-    subprocess.call([sys.executable, '-m', 'pip', 'install', name])
-
-
 
 yf.pdr_override()
 
@@ -142,9 +138,5 @@ def main():
     st.write(f"Volatility (Standard Deviation of Daily Returns): {volatility:.2%}")
     
 if __name__ == '__main__':
-    install('matplotlib')
-    install('pandas')    
-    install('numpy')
-    install('pandas-datareader')
     main()
 
