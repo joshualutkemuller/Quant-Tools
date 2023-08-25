@@ -1,3 +1,8 @@
 matplotlib>=3.7.0
 numpy>=1.25.0
 pandas>=2.0.0
+bs4==0.0.1
+datetime==5.2
+yfinance==0.2.28
+requests==2.31.0
+pandas-datareader==0.10.0
